@@ -258,8 +258,6 @@ void recommend_songs(Heap* heap, const char* book_genre) {
 
     printf("\n추천된 노래가 playlist.txt에 저장되었습니다.\n");
 
-    // 그 후 Python 스크립트를 호출
-    create_youtube_playlist();
 }
 
 // 장르 매핑 추가 최적화
