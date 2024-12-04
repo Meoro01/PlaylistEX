@@ -12,23 +12,23 @@
 #define MAX_GENRE_WEIGHTS 20
 
 
-// Ã¥ ±¸Á¶Ã¼
+// ì±… êµ¬ì¡°ì²´
 typedef struct {
     char title[MAX_TITLE];
     char author[MAX_TITLE];
     char genre[MAX_GENRE];
 } Book;
 
-// ³ë·¡ ±¸Á¶Ã¼
+// ë…¸ë˜ êµ¬ì¡°ì²´
 typedef struct {
     char title[MAX_TITLE];
     char artist[MAX_TITLE];
-    char genres[2][MAX_GENRE]; // Àå¸£ 2°³ ÀúÀå °¡´É
-    int weight;                // °¡ÁßÄ¡
-    char url[256];       // URL Ãß°¡
+    char genres[2][MAX_GENRE]; // ì¥ë¥´ 2ê°œ ì €ì¥ ê°€ëŠ¥
+    int weight;                // ê°€ì¤‘ì¹˜
+    char url[256];       // URL ì¶”ê°€
 } Song;
 
-// Èü ±¸Á¶Ã¼
+// í™ êµ¬ì¡°ì²´
 typedef struct {
     Book books[MAX_ELEMENT];
     int book_count;
@@ -36,7 +36,7 @@ typedef struct {
     int song_count;
 } Heap;
 
-// Àå¸£ °¡ÁßÄ¡ ±¸Á¶Ã¼
+// ì¥ë¥´ ê°€ì¤‘ì¹˜ êµ¬ì¡°ì²´
 typedef struct {
     char book_genre[MAX_GENRE];
     char song_genre[MAX_GENRE];
@@ -46,7 +46,7 @@ typedef struct {
 GenreWeight genre_weights[MAX_GENRE_WEIGHTS];
 int genre_weight_count = 0;
 
-// Èü ÃÊ±âÈ­
+// í™ ì´ˆê¸°í™”
 Heap* create_heap() {
     Heap* h = (Heap*)malloc(sizeof(Heap));
     h->book_count = 0;
@@ -54,7 +54,7 @@ Heap* create_heap() {
     return h;
 }
 
-// ¹®ÀÚ¿­ ¾ÕµÚ °ø¹é Á¦°Å
+// ë¬¸ìì—´ ì•ë’¤ ê³µë°± ì œê±°
 void trim(char* str) {
     int start = 0, end = strlen(str) - 1;
 
@@ -65,11 +65,11 @@ void trim(char* str) {
         end--;
     }
 
-    str[end + 1] = '\0'; // ³¡¿¡ NULL ¹®ÀÚ Ãß°¡
-    memmove(str, str + start, end - start + 2); // ¹®ÀÚ¿­ ÀÌµ¿
+    str[end + 1] = '\0'; // ëì— NULL ë¬¸ì ì¶”ê°€
+    memmove(str, str + start, end - start + 2); // ë¬¸ìì—´ ì´ë™
 }
 
-// ¹®ÀÚ¿­ ³¡ÀÇ '\r' Á¦°Å ÇÔ¼ö
+// ë¬¸ìì—´ ëì˜ '\r' ì œê±° í•¨ìˆ˜
 void remove_carriage_return(char* str) {
     size_t len = strlen(str);
     if (len > 0 && str[len - 1] == '\r') {
@@ -77,11 +77,11 @@ void remove_carriage_return(char* str) {
     }
 }
 
-// µ¥ÀÌÅÍ ·Îµå
+// ë°ì´í„° ë¡œë“œ
 void load_data(Heap* heap, const char* filename, const char* type) {
     FILE* file = fopen(filename, "r");
     if (!file) {
-        perror("ÆÄÀÏÀ» ¿­ ¼ö ¾ø½À´Ï´Ù");
+        perror("íŒŒì¼ì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤");
         exit(1);
     }
 
@@ -116,7 +116,7 @@ void load_data(Heap* heap, const char* filename, const char* type) {
                 heap->songs[heap->song_count++] = song;
             }
             if (sscanf(line, "%[^-] - %[^-] - %[^-] - %[^\n]", song.title, song.artist, genres, song.url) != 4) {
-                printf("¶óÀÎ ºĞ¼® ½ÇÆĞ: %s\n", line);
+                printf("ë¼ì¸ ë¶„ì„ ì‹¤íŒ¨: %s\n", line);
                 continue;
             }
         }
@@ -128,56 +128,51 @@ void load_data(Heap* heap, const char* filename, const char* type) {
 void save_playlist_to_file(Song* songs, int count, const char* filename) {
     FILE* file = fopen(filename, "w");
     if (!file) {
-        perror("ÆÄÀÏÀ» ¿­ ¼ö ¾ø½À´Ï´Ù");
+        perror("íŒŒì¼ì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤");
         exit(1);
     }
 
     for (int i = 0; i < count && i < 10; i++) {
-        fprintf(file, "%s - %s - %s\n", songs[i].title, songs[i].artist, songs[i].url);  // URL Æ÷ÇÔ
+        fprintf(file, "%s - %s - %s\n", songs[i].title, songs[i].artist, songs[i].url);  // URL í¬í•¨
     }
 
     fclose(file);
 }
 
-void create_youtube_playlist() {
-    // ÆÄÀÌ½ã ½ºÅ©¸³Æ® È£Ãâ
-    system("python3 create_youtube_playlist.py");
-}
-
-// Ã¥ ¼±ÅÃ ÇÔ¼ö
+// ì±… ì„ íƒ í•¨ìˆ˜
 bool choose_book(Book* books, int book_count, const char* genre, char* selected_title) {
-    printf("\n'%s' Àå¸£ÀÇ Ã¥ ¸ñ·Ï:\n", genre);
+    printf("\n'%s' ì¥ë¥´ì˜ ì±… ëª©ë¡:\n", genre);
     int valid_books = 0;
 
     for (int i = 0; i < book_count; i++) {
         if (strcmp(books[i].genre, genre) == 0) {
-            printf("- %s (ÀúÀÚ: %s)\n", books[i].title, books[i].author);
+            printf("- %s (ì €ì: %s)\n", books[i].title, books[i].author);
             valid_books++;
         }
     }
 
     if (valid_books == 0) {
-        printf("ÇØ´ç Àå¸£¿¡ ¸Â´Â Ã¥ÀÌ ¾ø½À´Ï´Ù.\n");
+        printf("í•´ë‹¹ ì¥ë¥´ì— ë§ëŠ” ì±…ì´ ì—†ìŠµë‹ˆë‹¤.\n");
         return false;
     }
 
-    // Ã¥ Á¦¸ñ ¼±ÅÃ
+    // ì±… ì œëª© ì„ íƒ
     while (true) {
-        printf("\nÃ¥ Á¦¸ñÀ» ÀÔ·ÂÇÏ¼¼¿ä: ");
-        scanf(" %[^\n]", selected_title); // Ã¥ Á¦¸ñ ÀÔ·Â ¹ŞÀ½
+        printf("\nì±… ì œëª©ì„ ì…ë ¥í•˜ì„¸ìš”: ");
+        scanf(" %[^\n]", selected_title); // ì±… ì œëª© ì…ë ¥ ë°›ìŒ
 
         for (int i = 0; i < book_count; i++) {
             if (strcmp(books[i].title, selected_title) == 0 &&
                 strcmp(books[i].genre, genre) == 0) {
-                return true; // ¼±ÅÃµÈ Ã¥ÀÌ À¯È¿ÇÑ °æ¿ì
+                return true; // ì„ íƒëœ ì±…ì´ ìœ íš¨í•œ ê²½ìš°
             }
         }
 
-        printf("'%s' Àå¸£¿¡ ÇØ´çÇÏ´Â Ã¥ Á¦¸ñÀÌ ¾Æ´Õ´Ï´Ù. ´Ù½Ã ÀÔ·ÂÇÏ¼¼¿ä.\n", genre);
+        printf("'%s' ì¥ë¥´ì— í•´ë‹¹í•˜ëŠ” ì±… ì œëª©ì´ ì•„ë‹™ë‹ˆë‹¤. ë‹¤ì‹œ ì…ë ¥í•˜ì„¸ìš”.\n", genre);
     }
 }
 
-// Àå¸£ °¡ÁßÄ¡ Ãß°¡
+// ì¥ë¥´ ê°€ì¤‘ì¹˜ ì¶”ê°€
 void add_genre_weight(const char* book_genre, const char* song_genre, int weight) {
     if (genre_weight_count < MAX_GENRE_WEIGHTS) {
         strcpy(genre_weights[genre_weight_count].book_genre, book_genre);
@@ -190,7 +185,7 @@ void recommend_songs(Heap* heap, const char* book_genre) {
     Song recommendations[MAX_ELEMENT];
     int rec_count = 0;
 
-    // ³ë·¡ °¡ÁßÄ¡ °è»ê
+    // ë…¸ë˜ ê°€ì¤‘ì¹˜ ê³„ì‚°
     for (int i = 0; i < heap->song_count; i++) {
         int total_weight = 0;
 
@@ -219,7 +214,7 @@ void recommend_songs(Heap* heap, const char* book_genre) {
         }
     }
 
-    // °¡ÁßÄ¡·Î Á¤·Ä (·£´ı¼º Ãß°¡)
+    // ê°€ì¤‘ì¹˜ë¡œ ì •ë ¬ (ëœë¤ì„± ì¶”ê°€)
     srand(time(NULL));
     for (int i = 0; i < rec_count - 1; i++) {
         for (int j = i + 1; j < rec_count; j++) {
@@ -232,13 +227,13 @@ void recommend_songs(Heap* heap, const char* book_genre) {
         }
     }
 
-    // ÃßÃµ Ãâ·Â
+    // ì¶”ì²œ ì¶œë ¥
     if (rec_count == 0) {
-        printf("\nÃßÃµÇÒ À½¾ÇÀÌ ¾ø½À´Ï´Ù.\n");
+        printf("\nì¶”ì²œí•  ìŒì•…ì´ ì—†ìŠµë‹ˆë‹¤.\n");
         return;
     }
 
-    printf("\nÃßÃµ À½¾Ç ¸®½ºÆ®:\n");
+    printf("\nì¶”ì²œ ìŒì•… ë¦¬ìŠ¤íŠ¸:\n");
     for (int i = 0; i < (rec_count > 10 ? 10 : rec_count); i++) {
         char genre_display[MAX_GENRE * 2] = "";
         if (strlen(recommendations[i].genres[1]) > 0 &&
@@ -250,7 +245,7 @@ void recommend_songs(Heap* heap, const char* book_genre) {
             snprintf(genre_display, sizeof(genre_display), "%s", recommendations[i].genres[0]);
         }
 
-        printf("- %s (¾ÆÆ¼½ºÆ®: %s / Àå¸£: %s / °¡ÁßÄ¡ ÇÕ°è: %d)\n",
+        printf("- %s (ì•„í‹°ìŠ¤íŠ¸: %s / ì¥ë¥´: %s / ê°€ì¤‘ì¹˜ í•©ê³„: %d)\n",
             recommendations[i].title,
             recommendations[i].artist,
             genre_display,
@@ -258,36 +253,36 @@ void recommend_songs(Heap* heap, const char* book_genre) {
     }
 
 
-    // ÃßÃµµÈ ³ë·¡¸¦ playlist.txt ÆÄÀÏ¿¡ ÀúÀå
+    // ì¶”ì²œëœ ë…¸ë˜ë¥¼ playlist.txt íŒŒì¼ì— ì €ì¥
     save_playlist_to_file(recommendations, rec_count, "playlist.txt");
 
-    printf("\nÃßÃµµÈ ³ë·¡°¡ playlist.txt¿¡ ÀúÀåµÇ¾ú½À´Ï´Ù.\n");
+    printf("\nì¶”ì²œëœ ë…¸ë˜ê°€ playlist.txtì— ì €ì¥ë˜ì—ˆìŠµë‹ˆë‹¤.\n");
 
-    // ±× ÈÄ Python ½ºÅ©¸³Æ®¸¦ È£Ãâ
+    // ê·¸ í›„ Python ìŠ¤í¬ë¦½íŠ¸ë¥¼ í˜¸ì¶œ
     create_youtube_playlist();
 }
 
-// Àå¸£ ¸ÅÇÎ Ãß°¡ ÃÖÀûÈ­
+// ì¥ë¥´ ë§¤í•‘ ì¶”ê°€ ìµœì í™”
 void initialize_genre_weights() {
     const char* mappings[][3] = {
-        {"ÆÇÅ¸Áö", "Å¬·¡½Ä(¹àÀ½)", "4"},
-        {"ÆÇÅ¸Áö", "¿µÈ­OST", "5"},
-        {"ÆÇÅ¸Áö", "ÀÎµğ", "3"},
-        {"¹Ì½ºÅÍ¸®", "¾Úºñ¾ğÆ®", "5"},
-        {"¹Ì½ºÅÍ¸®", "Å¬·¡½Ä(¾îµÎ¿ò)", "4"},
-        {"¹Ì½ºÅÍ¸®", "ÀçÁî", "2"},
-        {"·Î¸Ç½º", "¾îÄí½ºÆ½", "4"},
-        {"·Î¸Ç½º", "¹ß¶óµå", "5"},
-        {"·Î¸Ç½º", "ÀÎµğ", "3"},
-        {"SF", "¾Úºñ¾ğÆ®", "4"},
-        {"SF", "Å¬·¡½Ä(¾îµÎ¿ò)", "5"},
-        {"SF", "ÀçÁî", "2"},
-        {"ÀÚ±â°³¹ß", "Å¬·¡½Ä(¹àÀ½)", "5" },
-        {"ÀÚ±â°³¹ß", "ÀÎµğ", "3" },
-        {"ÀÚ±â°³¹ß", "ÀçÁî", "2" },
-        {"¿ª»ç", "Å¬·¡½Ä(¾îµÎ¿ò)", "4"},
-        {"¿ª»ç", "·ÎÆÄÀÌ", "5"},
-        {"¿ª»ç", "ÀçÁî", "2"}
+        {"íŒíƒ€ì§€", "í´ë˜ì‹(ë°ìŒ)", "4"},
+        {"íŒíƒ€ì§€", "ì˜í™”OST", "5"},
+        {"íŒíƒ€ì§€", "ì¸ë””", "3"},
+        {"ë¯¸ìŠ¤í„°ë¦¬", "ì•°ë¹„ì–¸íŠ¸", "5"},
+        {"ë¯¸ìŠ¤í„°ë¦¬", "í´ë˜ì‹(ì–´ë‘ì›€)", "4"},
+        {"ë¯¸ìŠ¤í„°ë¦¬", "ì¬ì¦ˆ", "2"},
+        {"ë¡œë§¨ìŠ¤", "ì–´ì¿ ìŠ¤í‹±", "4"},
+        {"ë¡œë§¨ìŠ¤", "ë°œë¼ë“œ", "5"},
+        {"ë¡œë§¨ìŠ¤", "ì¸ë””", "3"},
+        {"SF", "ì•°ë¹„ì–¸íŠ¸", "4"},
+        {"SF", "í´ë˜ì‹(ì–´ë‘ì›€)", "5"},
+        {"SF", "ì¬ì¦ˆ", "2"},
+        {"ìê¸°ê°œë°œ", "í´ë˜ì‹(ë°ìŒ)", "5" },
+        {"ìê¸°ê°œë°œ", "ì¸ë””", "3" },
+        {"ìê¸°ê°œë°œ", "ì¬ì¦ˆ", "2" },
+        {"ì—­ì‚¬", "í´ë˜ì‹(ì–´ë‘ì›€)", "4"},
+        {"ì—­ì‚¬", "ë¡œíŒŒì´", "5"},
+        {"ì—­ì‚¬", "ì¬ì¦ˆ", "2"}
     };
 
     for (int i = 0; i < sizeof(mappings) / sizeof(mappings[0]); i++) {
@@ -296,28 +291,28 @@ void initialize_genre_weights() {
 }
 
 void debug_songs(Heap* heap) {
-    printf("·ÎµùµÈ ³ë·¡ ¸®½ºÆ®:\n");
+    printf("ë¡œë”©ëœ ë…¸ë˜ ë¦¬ìŠ¤íŠ¸:\n");
     for (int i = 0; i < heap->song_count; i++) {
-        printf("- Á¦¸ñ: %s, ¾ÆÆ¼½ºÆ®: %s, Àå¸£: %s, %s\n",
+        printf("- ì œëª©: %s, ì•„í‹°ìŠ¤íŠ¸: %s, ì¥ë¥´: %s, %s\n",
             heap->songs[i].title,
             heap->songs[i].artist,
             heap->songs[i].genres[0],
-            strlen(heap->songs[i].genres[1]) > 0 ? heap->songs[i].genres[1] : "(¾øÀ½)");
+            strlen(heap->songs[i].genres[1]) > 0 ? heap->songs[i].genres[1] : "(ì—†ìŒ)");
     }
 }
 
 
-// Ã¥ Àå¸£µéÀ» Ãâ·ÂÇÏ´Â ÇÔ¼ö
+// ì±… ì¥ë¥´ë“¤ì„ ì¶œë ¥í•˜ëŠ” í•¨ìˆ˜
 void print_available_genres(Heap* heap) {
     char unique_genres[MAX_ELEMENT][MAX_GENRE];
     int unique_count = 0;
 
-    printf("\n»ç¿ë °¡´ÉÇÑ Ã¥ Àå¸£ ¸ñ·Ï:\n");
+    printf("\nì‚¬ìš© ê°€ëŠ¥í•œ ì±… ì¥ë¥´ ëª©ë¡:\n");
 
     for (int i = 0; i < heap->book_count; i++) {
         bool is_unique = true;
 
-        // ÇöÀç Ã¥ÀÇ Àå¸£°¡ ÀÌ¹Ì ¸ñ·Ï¿¡ ÀÖ´ÂÁö È®ÀÎ
+        // í˜„ì¬ ì±…ì˜ ì¥ë¥´ê°€ ì´ë¯¸ ëª©ë¡ì— ìˆëŠ”ì§€ í™•ì¸
         for (int j = 0; j < unique_count; j++) {
             if (strcmp(heap->books[i].genre, unique_genres[j]) == 0) {
                 is_unique = false;
@@ -325,7 +320,7 @@ void print_available_genres(Heap* heap) {
             }
         }
 
-        // °íÀ¯ÇÑ Àå¸£¶ó¸é Ãß°¡
+        // ê³ ìœ í•œ ì¥ë¥´ë¼ë©´ ì¶”ê°€
         if (is_unique) {
             strcpy(unique_genres[unique_count++], heap->books[i].genre);
             printf("- %s\n", heap->books[i].genre);
@@ -333,42 +328,42 @@ void print_available_genres(Heap* heap) {
     }
 
     if (unique_count == 0) {
-        printf("»ç¿ë °¡´ÉÇÑ Àå¸£°¡ ¾ø½À´Ï´Ù.\n");
+        printf("ì‚¬ìš© ê°€ëŠ¥í•œ ì¥ë¥´ê°€ ì—†ìŠµë‹ˆë‹¤.\n");
     }
 }
 
-// ¸ŞÀÎ ÇÔ¼ö
+// ë©”ì¸ í•¨ìˆ˜
 int main() {
     Heap* heap = create_heap();
 
-    // µ¥ÀÌÅÍ ·Îµå
+    // ë°ì´í„° ë¡œë“œ
     load_data(heap, "books.txt", "book");
     load_data(heap, "songs.txt", "song");
 
-    // Àå¸£ °¡ÁßÄ¡ ÃÊ±âÈ­
+    // ì¥ë¥´ ê°€ì¤‘ì¹˜ ì´ˆê¸°í™”
     initialize_genre_weights();
 
-    // »ç¿ë °¡´ÉÇÑ Ã¥ Àå¸£ Ãâ·Â
+    // ì‚¬ìš© ê°€ëŠ¥í•œ ì±… ì¥ë¥´ ì¶œë ¥
     print_available_genres(heap);
 
     char genre[MAX_GENRE];
     char selected_title[MAX_TITLE];
 
-    // Ã¥ Àå¸£ ÀÔ·Â ¹Ş±â
+    // ì±… ì¥ë¥´ ì…ë ¥ ë°›ê¸°
     while (true) {
-        printf("Ã¥ Àå¸£¸¦ ÀÔ·ÂÇÏ¼¼¿ä (Á¾·áÇÏ·Á¸é 'Á¾·á' ÀÔ·Â): ");
+        printf("ì±… ì¥ë¥´ë¥¼ ì…ë ¥í•˜ì„¸ìš” (ì¢…ë£Œí•˜ë ¤ë©´ 'ì¢…ë£Œ' ì…ë ¥): ");
         if (scanf(" %[^\n]", genre) != 1) {
-            printf("ÀÔ·Â ¿À·ù! Ã¥ Àå¸£¸¦ Á¤È®È÷ ÀÔ·ÂÇÏ¼¼¿ä.\n");
-            continue;  // Àß¸øµÈ ÀÔ·ÂÀÌ¸é ´Ù½Ã ÀÔ·Â ¹Ş±â
+            printf("ì…ë ¥ ì˜¤ë¥˜! ì±… ì¥ë¥´ë¥¼ ì •í™•íˆ ì…ë ¥í•˜ì„¸ìš”.\n");
+            continue;  // ì˜ëª»ëœ ì…ë ¥ì´ë©´ ë‹¤ì‹œ ì…ë ¥ ë°›ê¸°
         }
 
-        // 'Á¾·á' ÀÔ·Â ½Ã ÇÁ·Î±×·¥ Á¾·á
-        if (strcmp(genre, "Á¾·á") == 0) {
-            printf("ÇÁ·Î±×·¥À» Á¾·áÇÕ´Ï´Ù.\n");
+        // 'ì¢…ë£Œ' ì…ë ¥ ì‹œ í”„ë¡œê·¸ë¨ ì¢…ë£Œ
+        if (strcmp(genre, "ì¢…ë£Œ") == 0) {
+            printf("í”„ë¡œê·¸ë¨ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.\n");
             break;
         }
 
-        // Àå¸£ ¸ñ·Ï¿¡ ÀÖ´ÂÁö È®ÀÎ
+        // ì¥ë¥´ ëª©ë¡ì— ìˆëŠ”ì§€ í™•ì¸
         bool genre_found = false;
         for (int i = 0; i < heap->book_count; i++) {
             if (strcmp(heap->books[i].genre, genre) == 0) {
@@ -378,19 +373,19 @@ int main() {
         }
 
         if (genre_found) {
-            break;  // Àå¸£°¡ ¸ñ·Ï¿¡ ÀÖÀ¸¸é Á¾·á
+            break;  // ì¥ë¥´ê°€ ëª©ë¡ì— ìˆìœ¼ë©´ ì¢…ë£Œ
         }
         else {
-            printf("Àå¸£°¡ ¸ñ·Ï¿¡ ¾ø½À´Ï´Ù. ´Ù½Ã ÀÔ·ÂÇÏ¼¼¿ä.\n");
+            printf("ì¥ë¥´ê°€ ëª©ë¡ì— ì—†ìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì…ë ¥í•˜ì„¸ìš”.\n");
         }
     }
 
     if (choose_book(heap->books, heap->book_count, genre, selected_title)) {
-        printf("\n¼±ÅÃÇÑ Ã¥ Á¦¸ñ: %s\n", selected_title);
+        printf("\nì„ íƒí•œ ì±… ì œëª©: %s\n", selected_title);
         recommend_songs(heap, genre);
     }
     else {
-        printf("Ã¥ ¼±ÅÃÀÌ ¿Ï·áµÇÁö ¾Ê¾Ò½À´Ï´Ù.\n");
+        printf("ì±… ì„ íƒì´ ì™„ë£Œë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.\n");
     }
 
     free(heap);
